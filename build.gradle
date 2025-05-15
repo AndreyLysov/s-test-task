@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+def jacksonVersion = '2.14.2'
+def lombokVersion = '1.18.30'
+def allure = "2.25.0"
+def restAssured = "5.5.1"
+def testng = "7.11.0"
+def logback = "1.5.18"
+
+dependencies {
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+    implementation group: 'io.qameta.allure', name: 'allure-attachments', version: allure
+    implementation "io.qameta.allure:allure-testng:$allure"
+    implementation "io.qameta.allure:allure-rest-assured:$allure"
+
+    implementation("org.testng:testng:$testng")
+    implementation("io.rest-assured:rest-assured:$restAssured")
+
+    implementation("ch.qos.logback:logback-classic:$logback")
+
+    implementation group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+test {
+    doFirst {
+        systemProperty("threadCount", project.hasProperty("threadCount") ? project.property("threadCount") : "3")
+        systemProperty("url", project.hasProperty("url") ? project.property("url") : "http://3.68.165.45/")
+    }
+    useTestNG {
+        suiteName 'Spribe test task'
+        parallel 'classes'
+        testLogging.showStandardStreams = true
+        listeners << "org.listeners.ThreadSetupListener"
+    }
+}
